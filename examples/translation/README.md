@@ -5,7 +5,7 @@ as well as [training new models](#training-a-new-model).
 
 ## Pre-trained models
 
-Model | Description | Dataset | Download
+模型 | 描述 | 数据 | 下载
 ---|---|---|---
 `conv.wmt14.en-fr` | Convolutional <br> ([Gehring et al., 2017](https://arxiv.org/abs/1705.03122)) | [WMT14 English-French](http://statmt.org/wmt14/translation-task.html#Download) | model: <br> [download (.tar.bz2)](https://dl.fbaipublicfiles.com/fairseq/models/wmt14.v2.en-fr.fconv-py.tar.bz2) <br> newstest2014: <br> [download (.tar.bz2)](https://dl.fbaipublicfiles.com/fairseq/data/wmt14.v2.en-fr.newstest2014.tar.bz2) <br> newstest2012/2013: <br> [download (.tar.bz2)](https://dl.fbaipublicfiles.com/fairseq/data/wmt14.v2.en-fr.ntst1213.tar.bz2)
 `conv.wmt14.en-de` | Convolutional <br> ([Gehring et al., 2017](https://arxiv.org/abs/1705.03122)) | [WMT14 English-German](http://statmt.org/wmt14/translation-task.html#Download) | model: <br> [download (.tar.bz2)](https://dl.fbaipublicfiles.com/fairseq/models/wmt14.en-de.fconv-py.tar.bz2) <br> newstest2014: <br> [download (.tar.bz2)](https://dl.fbaipublicfiles.com/fairseq/data/wmt14.en-de.newstest2014.tar.bz2)
@@ -20,17 +20,75 @@ Model | Description | Dataset | Download
 
 ## Example usage (torch.hub)
 
-We require a few additional Python dependencies for preprocessing:
+我们需要一些其他Python依赖项来进行预处理:
 ```bash
 pip install fastBPE sacremoses subword_nmt
 ```
 
-Interactive translation via PyTorch Hub:
+通过PyTorch Hub进行交互式翻译:
 ```python
 import torch
 
-# List available models
-torch.hub.list('pytorch/fairseq')  # [..., 'transformer.wmt16.en-de', ... ]
+# 列出可用的模型
+torch.hub.list('pytorch/fairseq')  
+
+# 例如：
+['bart.base',
+ 'bart.large',
+ 'bart.large.cnn',
+ 'bart.large.mnli',
+ 'bart.large.xsum',
+ 'bpe',
+ 'camembert',
+ 'camembert-base',
+ 'camembert-base-ccnet',
+ 'camembert-base-ccnet-4gb',
+ 'camembert-base-oscar-4gb',
+ 'camembert-base-wikipedia-4gb',
+ 'camembert-large',
+ 'camembert.v0',
+ 'conv.stories',
+ 'conv.stories.pretrained',
+ 'conv.wmt14.en-de',
+ 'conv.wmt14.en-fr',
+ 'conv.wmt17.en-de',
+ 'data.stories',
+ 'dynamicconv.glu.wmt14.en-fr',
+ 'dynamicconv.glu.wmt16.en-de',
+ 'dynamicconv.glu.wmt17.en-de',
+ 'dynamicconv.glu.wmt17.zh-en',
+ 'dynamicconv.no_glu.iwslt14.de-en',
+ 'dynamicconv.no_glu.wmt16.en-de',
+ 'lightconv.glu.wmt14.en-fr',
+ 'lightconv.glu.wmt16.en-de',
+ 'lightconv.glu.wmt17.en-de',
+ 'lightconv.glu.wmt17.zh-en',
+ 'lightconv.no_glu.iwslt14.de-en',
+ 'lightconv.no_glu.wmt16.en-de',
+ 'roberta.base',
+ 'roberta.large',
+ 'roberta.large.mnli',
+ 'roberta.large.wsc',
+ 'tokenizer',
+ 'transformer.wmt14.en-fr',
+ 'transformer.wmt16.en-de',
+ 'transformer.wmt18.en-de',
+ 'transformer.wmt19.de-en',
+ 'transformer.wmt19.de-en.single_model',
+ 'transformer.wmt19.en-de',
+ 'transformer.wmt19.en-de.single_model',
+ 'transformer.wmt19.en-ru',
+ 'transformer.wmt19.en-ru.single_model',
+ 'transformer.wmt19.ru-en',
+ 'transformer.wmt19.ru-en.single_model',
+ 'transformer_lm.gbw.adaptive_huge',
+ 'transformer_lm.wiki103.adaptive',
+ 'transformer_lm.wmt19.de',
+ 'transformer_lm.wmt19.en',
+ 'transformer_lm.wmt19.ru',
+ 'xlmr.base',
+ 'xlmr.large']
+
 
 # Load a transformer trained on WMT'16 En-De
 # Note: WMT'19 models use fastBPE instead of subword_nmt, see instructions below
@@ -53,7 +111,7 @@ en2de.translate(['Hello world!', 'The cat sat on the mat.'])
 # ['Hallo Welt!', 'Die Katze saß auf der Matte.']
 ```
 
-Loading custom models:
+加载自定义模型:
 ```python
 from fairseq.models.transformer import TransformerModel
 zh2en = TransformerModel.from_pretrained(
@@ -67,8 +125,7 @@ zh2en.translate('你好 世界')
 # 'Hello World'
 ```
 
-If you are using a `transformer.wmt19` models, you will need to set the `bpe`
-argument to `'fastbpe'` and (optionally) load the 4-model ensemble:
+如果您使用的是`transformer.wmt19`模型，则需要将`bpe`参数设置为`'fastbpe'`并(可选)加载 4-model ensemble：
 ```python
 en2de = torch.hub.load('pytorch/fairseq', 'transformer.wmt19.en-de',
                        checkpoint_file='model1.pt:model2.pt:model3.pt:model4.pt',
@@ -78,7 +135,7 @@ en2de.eval()  # disable dropout
 
 ## Example usage (CLI tools)
 
-Generation with the binarized test sets can be run in batch mode as follows, e.g. for WMT 2014 English-French on a GTX-1080ti:
+二分类测试集的生成可按以下方式以批次模式运行，例如适用于GTX-1080ti上的WMT 2014 English-French：
 ```bash
 mkdir -p data-bin
 curl https://dl.fbaipublicfiles.com/fairseq/models/wmt14.v2.en-fr.fconv-py.tar.bz2 | tar xvjf - -C data-bin
@@ -97,13 +154,13 @@ fairseq-score --sys /tmp/gen.out.sys --ref /tmp/gen.out.ref
 # BLEU4 = 40.83, 67.5/46.9/34.4/25.5 (BP=1.000, ratio=1.006, syslen=83262, reflen=82787)
 ```
 
-## Training a new model
+## 训练新模型
 
 ### IWSLT'14 German to English (Transformer)
 
-The following instructions can be used to train a Transformer model on the [IWSLT'14 German to English dataset](http://workshop2014.iwslt.org/downloads/proceeding.pdf).
+以下说明可用于训练Transformer模型在数据  [IWSLT'14 German to English dataset](http://workshop2014.iwslt.org/downloads/proceeding.pdf).
 
-First download and preprocess the data:
+首先下载并预处理数据:
 ```bash
 # Download and prepare the data
 cd examples/translation/
@@ -118,7 +175,7 @@ fairseq-preprocess --source-lang de --target-lang en \
     --workers 20
 ```
 
-Next we'll train a Transformer translation model over this data:
+接下来，我们将针对此数据训练一个Transformer翻译模型:
 ```bash
 CUDA_VISIBLE_DEVICES=0 fairseq-train \
     data-bin/iwslt14.tokenized.de-en \
@@ -136,7 +193,7 @@ CUDA_VISIBLE_DEVICES=0 fairseq-train \
     --best-checkpoint-metric bleu --maximize-best-checkpoint-metric
 ```
 
-Finally we can evaluate our trained model:
+最后，我们可以评估我们训练过的模型:
 ```bash
 fairseq-generate data-bin/iwslt14.tokenized.de-en \
     --path checkpoints/checkpoint_best.pt \
@@ -145,13 +202,13 @@ fairseq-generate data-bin/iwslt14.tokenized.de-en \
 
 ### WMT'14 English to German (Convolutional)
 
-The following instructions can be used to train a Convolutional translation model on the WMT English to German dataset.
-See the [Scaling NMT README](../scaling_nmt/README.md) for instructions to train a Transformer translation model on this data.
+以下说明可用于在WMT英语到德语数据集上训练卷积翻译模型。
+See the [Scaling NMT README](../scaling_nmt/README.md) 有关在此数据上训练Transformer转换模型的说明。
 
-The WMT English to German dataset can be preprocessed using the `prepare-wmt14en2de.sh` script.
-By default it will produce a dataset that was modeled after [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762), but with additional news-commentary-v12 data from WMT'17.
+可以使用“ prepare-wmt14en2de.sh”脚本对WMT英语到德语数据集进行预处理。
+默认情况下，它将生成在以下情况下建模的数据集  [Attention Is All You Need (Vaswani et al., 2017)](https://arxiv.org/abs/1706.03762), but with additional news-commentary-v12 data from WMT'17.
 
-To use only data available in WMT'14 or to replicate results obtained in the original [Convolutional Sequence to Sequence Learning (Gehring et al., 2017)](https://arxiv.org/abs/1705.03122) paper, please use the `--icml17` option.
+仅使用WMT'14中可用的数据中获得的结果，原始论文 [Convolutional Sequence to Sequence Learning (Gehring et al., 2017)](https://arxiv.org/abs/1705.03122) paper, please use the `--icml17` option.
 
 ```bash
 # Download and prepare the data
@@ -224,12 +281,10 @@ fairseq-generate \
 
 ## Multilingual Translation
 
-We also support training multilingual translation models. In this example we'll
-train a multilingual `{de,fr}-en` translation model using the IWSLT'17 datasets.
+我们还支持训练多语言翻译模型。在此样本中，我们将使用IWSLT'17数据集训练多语言的`{de,fr}-en`翻译模型。
 
-Note that we use slightly different preprocessing here than for the IWSLT'14
-En-De data above. In particular we learn a joint BPE code for all three
-languages and use fairseq-interactive and sacrebleu for scoring the test set.
+请注意，此处使用的预处理与上面的IWSLT'14 En-De数据略有不同。
+特别是，我们学习了所有三种语言的联合BPE代码，并使用fairseq-interactive和sacrebleu对测试集进行评分。
 
 ```bash
 # First install sacrebleu and sentencepiece
@@ -293,9 +348,7 @@ grep ^H iwslt17.test.${SRC}-en.en.sys | cut -f3 \
     | sacrebleu --test-set iwslt17 --language-pair ${SRC}-en
 ```
 
-##### Argument format during inference
+##### 推理期间的参数格式
 
-During inference it is required to specify a single `--source-lang` and
-`--target-lang`, which indicates the inference langauge direction.
-`--lang-pairs`, `--encoder-langtok`, `--decoder-langtok` have to be set to
-the same value as training.
+在推理过程中，需要指定单个`--source-lang`和`--target-lang`，以指示推理语言的方向。 
+“ --lang-pairs”，“-encoder-langtok”，“-decoder-langtok”必须设置为与training相同的值。
