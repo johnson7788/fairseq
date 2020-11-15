@@ -166,13 +166,92 @@ fairseq-score --sys /tmp/gen.out.sys --ref /tmp/gen.out.ref
 cd examples/translation/
 bash prepare-iwslt14.sh
 cd ../..
+# 处理后的文件结构:
+examples/translation/iwslt14.tokenized.de-en
+# tree iwslt14.tokenized.de-en/
+iwslt14.tokenized.de-en/
+├── code
+├── test.de
+├── test.en
+├── tmp
+│   ├── IWSLT14.TED.dev2010.de-en.de
+│   ├── IWSLT14.TED.dev2010.de-en.en
+│   ├── IWSLT14.TED.tst2010.de-en.de
+│   ├── IWSLT14.TED.tst2010.de-en.en
+│   ├── IWSLT14.TED.tst2011.de-en.de
+│   ├── IWSLT14.TED.tst2011.de-en.en
+│   ├── IWSLT14.TED.tst2012.de-en.de
+│   ├── IWSLT14.TED.tst2012.de-en.en
+│   ├── IWSLT14.TEDX.dev2012.de-en.de
+│   ├── IWSLT14.TEDX.dev2012.de-en.en
+│   ├── test.de
+│   ├── test.en
+│   ├── train.de
+│   ├── train.en
+│   ├── train.en-de
+│   ├── train.tags.de-en.clean.de
+│   ├── train.tags.de-en.clean.en
+│   ├── train.tags.de-en.de
+│   ├── train.tags.de-en.en
+│   ├── train.tags.de-en.tok.de
+│   ├── train.tags.de-en.tok.en
+│   ├── valid.de
+│   └── valid.en
+├── train.de
+├── train.en
+├── valid.de
+└── valid.en
 
-# Preprocess/binarize the data
+
+tree orig/
+orig/
+├── de-en
+│   ├── IWSLT14.TED.dev2010.de-en.de.xml
+│   ├── IWSLT14.TED.dev2010.de-en.en.xml
+│   ├── IWSLT14.TED.tst2010.de-en.de.xml
+│   ├── IWSLT14.TED.tst2010.de-en.en.xml
+│   ├── IWSLT14.TED.tst2011.de-en.de.xml
+│   ├── IWSLT14.TED.tst2011.de-en.en.xml
+│   ├── IWSLT14.TED.tst2012.de-en.de.xml
+│   ├── IWSLT14.TED.tst2012.de-en.en.xml
+│   ├── IWSLT14.TEDX.dev2012.de-en.de.xml
+│   ├── IWSLT14.TEDX.dev2012.de-en.en.xml
+│   ├── README
+│   ├── train.en
+│   ├── train.tags.de-en.de
+│   └── train.tags.de-en.en
+└── de-en.tgz
+
+
+ls data-bin/
+preprocess.log
+
+# Preprocess/binarize the data, 在fairseq目录下运行
 TEXT=examples/translation/iwslt14.tokenized.de-en
 fairseq-preprocess --source-lang de --target-lang en \
     --trainpref $TEXT/train --validpref $TEXT/valid --testpref $TEXT/test \
     --destdir data-bin/iwslt14.tokenized.de-en \
     --workers 20
+#处理完成后，在 fairseq目录下生成data-bin目录
+tree data-bin/
+data-bin/
+└── iwslt14.tokenized.de-en
+    ├── dict.de.txt
+    ├── dict.en.txt
+    ├── preprocess.log
+    ├── test.de-en.de.bin
+    ├── test.de-en.de.idx
+    ├── test.de-en.en.bin
+    ├── test.de-en.en.idx
+    ├── train.de-en.de.bin
+    ├── train.de-en.de.idx
+    ├── train.de-en.en.bin
+    ├── train.de-en.en.idx
+    ├── valid.de-en.de.bin
+    ├── valid.de-en.de.idx
+    ├── valid.de-en.en.bin
+    └── valid.de-en.en.idx
+1 directory, 15 files
 ```
 
 接下来，我们将针对此数据训练一个Transformer翻译模型:

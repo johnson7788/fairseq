@@ -11,6 +11,7 @@ __pycache__/
 
 # macOS dir files
 .DS_Store
+pretrain_models
 
 # Distribution / packaging
 .Python
@@ -134,3 +135,7 @@ experimental/*
 
 # Weights and Biases logs
 wandb/
+examples/translation/iwslt14.tokenized.de-en/
+examples/translation/mosesdecoder/
+examples/translation/orig/
+examples/translation/subword-nmt/
