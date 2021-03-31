@@ -105,8 +105,10 @@ class TranslationMultiSimpleEpochTask(LegacyFairseqTask):
             args, self.lang_pairs, langs, dicts, self.sampling_method
         )
 
-    @classmethod
-    def check_dicts(cls, dicts, source_langs, target_langs):
+    def check_dicts(self, dicts, source_langs, target_langs):
+        if self.args.source_dict is not None or self.args.target_dict is not None:
+            # no need to check whether the source side and target side are sharing dictionaries
+            return
         src_dict = dicts[source_langs[0]]
         tgt_dict = dicts[target_langs[0]]
         for src_lang in source_langs:
@@ -123,7 +125,7 @@ class TranslationMultiSimpleEpochTask(LegacyFairseqTask):
     @classmethod
     def setup_task(cls, args, **kwargs):
         langs, dicts, training = MultilingualDatasetManager.prepare(
-            cls.load_dictionary, args, **kwargs
+           cls.load_dictionary, args, **kwargs
         )
         return cls(args, langs, dicts, training)
 
@@ -138,12 +140,16 @@ class TranslationMultiSimpleEpochTask(LegacyFairseqTask):
         """
         if split in self.datasets:
             dataset = self.datasets[split]
-            if self.has_sharded_data(split) and dataset.load_next_shard:
-                shard_epoch = dataset.shard_epoch
-            else:
-                # no need to load next shard so skip loading
-                # also this avoid always loading from beginning of the data
-                return
+            if self.has_sharded_data(split):
+                if self.args.virtual_epoch_size is not None:
+                    if dataset.load_next_shard:
+                        shard_epoch = dataset.shard_epoch
+                    else:
+                        # no need to load next shard so skip loading
+                        # also this avoid always loading from beginning of the data
+                        return
+                else:
+                    shard_epoch = epoch
         else:
             # estimate the shard epoch from virtual data size and virtual epoch size
             shard_epoch = self.data_manager.estimate_global_pass_epoch(epoch)
@@ -153,7 +159,7 @@ class TranslationMultiSimpleEpochTask(LegacyFairseqTask):
             del self.datasets[split]
             logger.info("old dataset deleted manually")
             logger.info(f"mem usage: {data_utils.get_mem_usage()}")
-        self.datasets[split] = self.data_manager.load_sampled_multi_epoch_dataset(
+        self.datasets[split] = self.data_manager.load_dataset(
             split,
             self.training,
             epoch=epoch,
@@ -259,11 +265,11 @@ class TranslationMultiSimpleEpochTask(LegacyFairseqTask):
 
     @property
     def source_dictionary(self):
-        return self.dicts[self.source_langs[0]]
+        return self.data_manager.get_source_dictionary(self.source_langs[0])
 
     @property
     def target_dictionary(self):
-        return self.dicts[self.target_langs[0]]
+        return self.data_manager.get_target_dictionary(self.target_langs[0])
 
     def create_batch_sampler_func(
         self,
